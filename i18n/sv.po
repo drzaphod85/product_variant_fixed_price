@@ -1,0 +1,81 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* product_variant_fixed_price
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-08 00:00+0000\n"
+"PO-Revision-Date: 2026-05-08 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Swedish\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,help:product_variant_fixed_price.field_product_template_attribute_value__fixed_price
+msgid ""
+"Absolute sales price for variants that include this attribute value. When "
+"set (greater than zero) it replaces the default behaviour of adding the "
+"template's list price and the price extra. If multiple attribute values on "
+"the same variant have a fixed price, the values are summed to compute the "
+"final variant price."
+msgstr ""
+"Absolut försäljningspris för varianter som innehåller detta attributvärde. "
+"När det är satt (större än noll) ersätter det standardbeteendet att lägga "
+"ihop mallens listpris och prispåslaget. Om flera attributvärden på samma "
+"variant har ett fast pris summeras värdena för att beräkna det slutliga "
+"variantpriset."
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,field_description:product_variant_fixed_price.field_product_template_attribute_value__fixed_price
+msgid "Fixed Price"
+msgstr "Fast pris"
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,field_description:product_variant_fixed_price.field_product_product__has_fixed_price
+msgid "Has Fixed Variant Price"
+msgstr "Har fast variantpris"
+
+#. module: product_variant_fixed_price
+#: model:ir.module.module,shortdesc:base.module_product_variant_fixed_price
+msgid "Product Variant Fixed Price"
+msgstr "Produktvariant – fast pris"
+
+#. module: product_variant_fixed_price
+#: model:ir.module.module,summary:base.module_product_variant_fixed_price
+msgid ""
+"Set an absolute (fixed) sales price per product variant attribute value "
+"instead of an extra amount added on top of the template price."
+msgstr ""
+"Sätt ett absolut (fast) försäljningspris per attributvärde för "
+"produktvarianter i stället för ett påslag ovanpå mallens pris."
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,help:product_variant_fixed_price.field_product_product__fixed_price_total
+msgid ""
+"Sum of the fixed prices of the attribute values that compose this variant. "
+"Only attribute values with fixed_price > 0 are summed; the others "
+"contribute zero to this total."
+msgstr ""
+"Summan av de fasta priserna för attributvärdena som utgör denna variant. "
+"Endast attributvärden med fixed_price > 0 räknas in; övriga bidrar med noll "
+"till summan."
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,help:product_variant_fixed_price.field_product_product__has_fixed_price
+msgid ""
+"Technical flag, true when at least one of the variant's attribute values "
+"has a fixed price greater than zero."
+msgstr ""
+"Teknisk flagga; sann när minst ett av variantens attributvärden har ett "
+"fast pris större än noll."
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,field_description:product_variant_fixed_price.field_product_product__fixed_price_total
+msgid "Variant Fixed Price"
+msgstr "Fast variantpris"

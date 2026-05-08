@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Expose `fixed_price` on the product template attribute value form so
+        the field can be edited from the dialog opened through the
+        "Attributes & Variants" tab on the product template form.
+    -->
+    <record id="product_template_attribute_value_view_form_inherit" model="ir.ui.view">
+        <field name="name">product.template.attribute.value.form.fixed.price</field>
+        <field name="model">product.template.attribute.value</field>
+        <field name="inherit_id" ref="product.product_template_attribute_value_view_form"/>
+        <field name="arch" type="xml">
+            <field name="price_extra" position="after">
+                <field name="fixed_price"/>
+            </field>
+        </field>
+    </record>
+
+    <!--
+        Show the computed fixed price total on the variant form so users can
+        verify what was computed for each generated product.product. The
+        fields are hidden when no fixed price is configured for the variant.
+    -->
+    <record id="product_normal_form_view_inherit_fixed_price" model="ir.ui.view">
+        <field name="name">product.product.form.fixed.price</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <field name="lst_price" position="after">
+                <field name="fixed_price_total"
+                       invisible="not has_fixed_price"
+                       readonly="1"/>
+                <field name="has_fixed_price" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
