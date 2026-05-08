@@ -9,6 +9,28 @@ and this project adheres to the Odoo module versioning scheme
 
 ## [Unreleased]
 
+## [19.0.1.0.1] - 2026-05-08
+
+### Fixed
+
+- `ProductProduct._price_compute` now uses a generic `*args, **kwargs`
+  signature so it forwards the keyword arguments that the Odoo 19 parent
+  method actually accepts. The previous explicit signature carried over
+  `fiscal_position` and `company` from older Odoo versions and raised
+  `TypeError: _price_compute() got an unexpected keyword argument
+  'fiscal_position'` whenever the website snippet, a pricelist rule or any
+  other caller exercised the override.
+
+### Changed
+
+- Removed the `sale.order.line._compute_price_unit` override. Re-declaring
+  `@api.depends` on an inherited compute method silently replaces the
+  parent's dependency list, which broke recompute triggers on product /
+  quantity / pricelist changes. The fixed price still flows into
+  `price_unit` automatically through the overridden
+  `product.product._price_compute('list_price')`, so no replacement
+  override is needed.
+
 ## [19.0.1.0.0] - 2026-05-08
 
 ### Added
@@ -40,5 +62,6 @@ and this project adheres to the Odoo module versioning scheme
 - Pricelist rules are not bypassed; they are evaluated on top of the new
   base price.
 
-[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.0...19.0
+[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.1...19.0
+[19.0.1.0.1]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.0...19.0.1.0.1
 [19.0.1.0.0]: https://github.com/drzaphod85/product_variant_fixed_price/releases/tag/19.0.1.0.0

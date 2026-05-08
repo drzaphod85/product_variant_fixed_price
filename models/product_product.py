@@ -62,38 +62,28 @@ class ProductProduct(models.Model):
                 price = product.uom_id._compute_price(price, to_uom)
             product.lst_price = price
 
-    def _price_compute(
-        self,
-        price_type,
-        fiscal_position=False,
-        currency=None,
-        uom=None,
-        company=False,
-        date=False,
-    ):
-        """Make the fixed price the source of truth for ``list_price`` lookups.
+    def _price_compute(self, price_type, *args, **kwargs):
+        """Substitute the fixed price for ``list_price`` lookups.
 
         ``product.product._price_compute`` is the entry point used by
         pricelists, sale order lines and the website to evaluate a product's
         list price. The standard implementation reads
-        ``product.list_price + product.price_extra``; we substitute the
-        configured fixed price when it is set so pricelist rules computed on
-        top of the list price use the right base.
+        ``product.list_price + product.price_extra``; we replace the result
+        with the configured fixed price when it is set so pricelist rules
+        compute on top of the right base.
+
+        The signature is intentionally kept generic (``*args, **kwargs``) so
+        the override stays compatible with any Odoo 19 minor that adjusts
+        the keyword arguments accepted by the parent method.
         """
-        prices = super()._price_compute(
-            price_type,
-            fiscal_position=fiscal_position,
-            currency=currency,
-            uom=uom,
-            company=company,
-            date=date,
-        )
+        prices = super()._price_compute(price_type, *args, **kwargs)
 
         if price_type != "list_price":
             return prices
 
-        company = company or self.env.company
-        date = date or fields.Date.context_today(self)
+        uom = kwargs.get("uom")
+        currency = kwargs.get("currency")
+        date = kwargs.get("date") or fields.Date.context_today(self)
 
         for product in self:
             priced_values = product.product_template_attribute_value_ids.filtered(
@@ -104,10 +94,12 @@ class ProductProduct(models.Model):
             price = sum(priced_values.mapped("fixed_price"))
             if uom and product.uom_id and uom != product.uom_id:
                 price = product.uom_id._compute_price(price, uom)
-            target_currency = currency or product.currency_id
-            if target_currency and product.currency_id and target_currency != product.currency_id:
+            if currency and product.currency_id and currency != product.currency_id:
                 price = product.currency_id._convert(
-                    price, target_currency, company, date,
+                    price,
+                    currency,
+                    self.env.company,
+                    date,
                 )
             prices[product.id] = price
 
