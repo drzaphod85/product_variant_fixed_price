@@ -33,11 +33,14 @@ module is safe to install on existing databases.
   `product.product`, displayed on the variant form when applicable.
 - Variant `lst_price`, pricelist `_compute_base_price` and sale order line
   `price_unit` all pick up the fixed price automatically.
-- E-commerce shop list aligned with the product page: when a template has
-  any variant with a fixed price set, the shop card shows the cheapest
-  priced variant's price instead of `template.list_price`, so the value
-  customers see in the listing matches the price displayed when they open
-  the product.
+- E-commerce shop list aligned with the product page: when *every*
+  variant of a template has a fixed price configured, the template's
+  `list_price` is automatically synced to the cheapest variant's price.
+  The field is shown read-only on the form to prevent it from being
+  desynchronised by mistake. Because Odoo reads `list_price` everywhere
+  (shop list, POS, sales orders, configurator, snippets, exported
+  reports), the price stays consistent across the entire stack without
+  per-view overrides.
 - Pricelists keep working unchanged — they operate on top of the new base
   price, so percentage / formula rules behave exactly as before.
 - Backwards compatible fallback: variants with no `fixed_price` configured
@@ -102,19 +105,35 @@ For products where only one attribute should drive the price, leave the
 fixed price at `0` on the other attribute's values; they will contribute
 nothing to the total.
 
-### E-commerce shop list
+### E-commerce shop list (and everywhere else)
 
-By default Odoo shows `template.list_price` on shop list cards but switches
-to the *cheapest variant's price* once the customer opens the product. This
-module aligns the two views: when at least one variant of the template has
-a `fixed_price > 0`, the shop card uses the same cheapest-variant price as
-the product page. No configuration is needed — the behaviour is automatic
-as soon as a fixed price is set.
+By default Odoo shows `template.list_price` on shop list cards but
+switches to the *cheapest variant's price* once the customer opens the
+product. The two views can therefore display different prices for the
+same product, which is confusing for shoppers.
 
-The substitution affects only price-related fields (`price`, `list_price`,
-`has_discounted_price`, `compare_list_price`, `currency_id`). The card's
-name, image and template link remain unchanged. If no variant has a fixed
-price, the standard Odoo display is preserved.
+This module aligns them by keeping `template.list_price` automatically
+synced to `min(variant.lst_price)` whenever every variant of the
+template has a fixed price configured. The sync is triggered by:
+
+- Editing `fixed_price` on any attribute value of the template.
+- Adding or removing an attribute value with a fixed price.
+- The post-install migration (one batched run for all migrated
+  templates).
+
+While the sync is active, the template's *Sales Price* field is shown
+read-only on the product form, with a helper boolean
+(`has_priced_variants`) signalling that auto-management is in effect.
+Setting the variant prices is then the only place you need to think
+about pricing.
+
+The all-or-nothing rule means the sync only applies to templates where
+every variant has its own fixed price. Templates that mix `fixed_price`
+and the standard `price_extra` keep the editable list_price and the
+default Odoo display, because lowering `list_price` would also lower
+the price of every variant that relies on `template.list_price +
+price_extra`. To bring such templates under the sync, fill in
+`fixed_price` on every variant's attribute values.
 
 ### Falling back to the legacy behaviour
 
@@ -144,8 +163,8 @@ value `0.0`), so re-installing the module is safe.
 | `product.template.attribute.value` | New `fixed_price` Float field. |
 | `product.product._compute_product_lst_price` | Returns `sum(fixed_price)` when any attribute value has it set, otherwise calls `super()`. |
 | `product.product._price_compute('list_price', …)` | Same substitution, applied at the entry point used by pricelists, the website and sale order lines. |
-| `product.template._price_compute('list_price', …)` | Returns the cheapest priced variant's price for the template. This is the upstream method called by `_get_sales_prices` on the `/shop` page. |
-| `product.template._get_combination_info` | When called without a specific variant (snippets, configurator default), routes a second `super()` call through the cheapest variant with a `fixed_price > 0` and copies the price-related keys back. Display name and image stay at the template level. |
+| `product.template.has_priced_variants` | New computed field, true when every variant of the template has `fixed_price > 0`. Used both as the trigger for the auto-sync and as the readonly condition on `list_price` in the form. |
+| `product.template._sync_list_price_from_variants()` | Sets `list_price = min(variant.lst_price)` for templates where the all-or-nothing rule applies. Called from CRUD hooks on `product.template.attribute.value` and from the post-install migration. |
 | `sale.order.line._compute_price_unit` | Extra `@api.depends` so draft order lines recompute when an attribute value's `fixed_price` is edited later. |
 | Views | `fixed_price` exposed next to `price_extra`; `fixed_price_total` shown on the variant form. |
 

@@ -1,13 +1,18 @@
 """Post-install migration hook for product_variant_fixed_price.
 
-Copies existing ``price_extra`` values into the new ``fixed_price`` field so
-that variants keep the same final selling price after installation.
+Two responsibilities:
 
-For every ``product.template.attribute.value`` whose ``price_extra`` is not
-zero, ``fixed_price`` is set to ``template.list_price + price_extra``. This
-matches the price that the variant would have produced before the module
-took over the price computation, preserving backwards compatibility for
-existing data.
+1. Copy existing ``price_extra`` values into the new ``fixed_price`` field
+   so variants keep the same final selling price after installation. For
+   every ``product.template.attribute.value`` whose ``price_extra`` is not
+   zero, ``fixed_price`` is set to ``template.list_price + price_extra``.
+
+2. Trigger ``_sync_list_price_from_variants`` once on every affected
+   template so that ``template.list_price`` is aligned with the cheapest
+   variant whenever every variant has a fixed price configured. The
+   per-write sync that lives on ``product.template.attribute.value`` is
+   suppressed during the migration with the ``skip_fixed_price_sync``
+   context flag and replaced by a single batched call at the end.
 """
 
 import logging
@@ -24,20 +29,29 @@ def post_init_migrate_price_extra(env):
         )
         return
 
+    affected_templates = env["product.template"]
     migrated = 0
-    for value in values:
+
+    # Suppress the per-write sync; we run it once below for the whole batch.
+    values_silent = values.with_context(skip_fixed_price_sync=True)
+    for value in values_silent:
         template = value.product_tmpl_id
         if not template:
             continue
-        new_price = template.list_price + value.price_extra
         # Only migrate when the field is still at its default to avoid
         # overwriting any value the user may have set during installation.
-        if value.fixed_price == 0.0:
-            value.fixed_price = new_price
-            migrated += 1
+        if value.fixed_price != 0.0:
+            continue
+        value.fixed_price = template.list_price + value.price_extra
+        affected_templates |= template
+        migrated += 1
+
+    if affected_templates:
+        affected_templates._sync_list_price_from_variants()
 
     _logger.info(
         "product_variant_fixed_price: migrated %s attribute value(s) "
-        "from price_extra to fixed_price.",
+        "from price_extra to fixed_price; synced %s template(s).",
         migrated,
+        len(affected_templates),
     )

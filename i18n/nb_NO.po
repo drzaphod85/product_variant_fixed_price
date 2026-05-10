@@ -23,13 +23,39 @@ msgid ""
 "set (greater than zero) it replaces the default behaviour of adding the "
 "template's list price and the price extra. If multiple attribute values on "
 "the same variant have a fixed price, the values are summed to compute the "
-"final variant price."
+"final variant price.\n"
+"\n"
+"When every variant of the template has a fixed price, the template's own "
+"Sales Price is automatically kept in sync with the cheapest variant so the "
+"e-commerce listing matches the product page."
 msgstr ""
 "Absolutt salgspris for varianter som inneholder denne attributtverdien. "
 "Når den er satt (større enn null), erstatter den standardatferden som "
 "legger sammen malens listepris og pristillegget. Hvis flere "
 "attributtverdier på samme variant har en fast pris, summeres verdiene for "
-"å beregne den endelige variantprisen."
+"å beregne den endelige variantprisen.\n"
+"\n"
+"Når alle varianter av malen har en fast pris, holdes malens egen salgspris "
+"automatisk synkronisert med den billigste varianten, slik at "
+"netthandelsoversikten samsvarer med produktsiden."
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,field_description:product_variant_fixed_price.field_product_template__has_priced_variants
+msgid "Has Variant Fixed Prices"
+msgstr "Har varianter med fast pris"
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,help:product_variant_fixed_price.field_product_template__has_priced_variants
+msgid ""
+"True when every variant of this template has a fixed_price (> 0) configured "
+"on its attribute values. While true, the template's Sales Price (list_price) "
+"is auto-synced to the cheapest variant's price and the field is shown read-"
+"only on the form."
+msgstr ""
+"Sant når hver variant av denne malen har en fast pris (fixed_price > 0) "
+"konfigurert på sine attributtverdier. Når dette er tilfelle, synkroniseres "
+"malens salgspris (list_price) automatisk med den billigste variantens pris, "
+"og feltet vises som skrivebeskyttet i skjemaet."
 
 #. module: product_variant_fixed_price
 #: model:ir.model.fields,field_description:product_variant_fixed_price.field_product_template_attribute_value__fixed_price

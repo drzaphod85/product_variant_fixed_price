@@ -23,13 +23,39 @@ msgid ""
 "set (greater than zero) it replaces the default behaviour of adding the "
 "template's list price and the price extra. If multiple attribute values on "
 "the same variant have a fixed price, the values are summed to compute the "
-"final variant price."
+"final variant price.\n"
+"\n"
+"When every variant of the template has a fixed price, the template's own "
+"Sales Price is automatically kept in sync with the cheapest variant so the "
+"e-commerce listing matches the product page."
 msgstr ""
 "Absolut salgspris for varianter, der inkluderer denne attributværdi. Når "
 "den er angivet (større end nul), erstatter den standardadfærden, hvor "
 "skabelonens listepris og pristillægget lægges sammen. Hvis flere "
 "attributværdier på samme variant har en fast pris, summeres værdierne for "
-"at beregne den endelige variantpris."
+"at beregne den endelige variantpris.\n"
+"\n"
+"Når alle varianter af skabelonen har en fast pris, holdes skabelonens egen "
+"salgspris automatisk synkroniseret med den billigste variant, så "
+"e-handelsoversigten matcher produktsiden."
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,field_description:product_variant_fixed_price.field_product_template__has_priced_variants
+msgid "Has Variant Fixed Prices"
+msgstr "Har varianter med fast pris"
+
+#. module: product_variant_fixed_price
+#: model:ir.model.fields,help:product_variant_fixed_price.field_product_template__has_priced_variants
+msgid ""
+"True when every variant of this template has a fixed_price (> 0) configured "
+"on its attribute values. While true, the template's Sales Price (list_price) "
+"is auto-synced to the cheapest variant's price and the field is shown read-"
+"only on the form."
+msgstr ""
+"Sandt når hver variant af denne skabelon har en fast pris (fixed_price > 0) "
+"konfigureret på sine attributværdier. Når dette er tilfældet, "
+"synkroniseres skabelonens salgspris (list_price) automatisk med den "
+"billigste variants pris, og feltet vises som skrivebeskyttet på formularen."
 
 #. module: product_variant_fixed_price
 #: model:ir.model.fields,field_description:product_variant_fixed_price.field_product_template_attribute_value__fixed_price

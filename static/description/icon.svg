@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8B5A8C"/>
+      <stop offset="100%" stop-color="#5C3F55"/>
+    </linearGradient>
+    <linearGradient id="tagFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F2E8EE"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="4"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background: rounded square with Odoo-purple gradient -->
+  <rect width="256" height="256" rx="44" fill="url(#bg)"/>
+
+  <!-- Decorative ghost tags in the corners -->
+  <g opacity="0.10">
+    <path d="M -10 50 L 60 50 L 88 80 L 60 140 L -10 140 Z" fill="#FFFFFF"/>
+    <circle cx="52" cy="64" r="5" fill="#5C3F55"/>
+  </g>
+  <g opacity="0.10">
+    <path d="M 196 130 L 266 130 L 294 160 L 266 220 L 196 220 Z" fill="#FFFFFF"/>
+    <circle cx="258" cy="144" r="5" fill="#5C3F55"/>
+  </g>
+
+  <!-- Main price tag with shadow -->
+  <g filter="url(#dropShadow)">
+    <path d="M 60 70 L 158 70 L 200 122 L 158 198 L 60 198 Z" fill="url(#tagFill)"/>
+    <circle cx="150" cy="92" r="9" fill="#5C3F55"/>
+
+    <!-- Equals sign: representing a FIXED price (not an extra/addition) -->
+    <rect x="78" y="120" width="62" height="11" rx="3" fill="#5C3F55"/>
+    <rect x="78" y="146" width="62" height="11" rx="3" fill="#5C3F55"/>
+  </g>
+
+  <!-- Three colored variant dots -->
+  <g>
+    <circle cx="92"  cy="226" r="12" fill="#00A09D" stroke="#FFFFFF" stroke-width="3"/>
+    <circle cx="128" cy="226" r="12" fill="#F0AD4E" stroke="#FFFFFF" stroke-width="3"/>
+    <circle cx="164" cy="226" r="12" fill="#D9534F" stroke="#FFFFFF" stroke-width="3"/>
+  </g>
+</svg>

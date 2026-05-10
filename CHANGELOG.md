@@ -9,6 +9,64 @@ and this project adheres to the Odoo module versioning scheme
 
 ## [Unreleased]
 
+## [19.0.2.0.0] - 2026-05-10
+
+### Changed
+
+- **Architecture switch.** Instead of overriding the e-commerce
+  rendering path to substitute the cheapest variant's price at display
+  time, the module now keeps `template.list_price` automatically synced
+  to `min(variant.lst_price)` whenever every variant of the template
+  has a `fixed_price` configured. This produces the correct price in
+  every Odoo view (shop list, product page, POS, sales orders,
+  configurator, snippets, exported reports, etc.) without per-view
+  overrides.
+- A new computed boolean `product.template.has_priced_variants` flags
+  templates that fall under the auto-sync rule. When it is true,
+  `list_price` is rendered read-only on the product template form to
+  prevent the user from desynchronising the field manually.
+- The `_sync_list_price_from_variants` method on `product.template`
+  intentionally skips templates that mix `fixed_price` and the standard
+  `price_extra` mechanism. Lowering `list_price` would otherwise also
+  lower the price of every variant that relies on
+  `template.list_price + price_extra`. The "all-or-nothing" rule lets
+  the two pricing modes coexist cleanly in the same database.
+
+### Added
+
+- New CRUD hooks on `product.template.attribute.value` (create / write
+  / unlink) that trigger the sync when `fixed_price` changes. A
+  `skip_fixed_price_sync` context flag allows batch operations (e.g.
+  the post-install migration) to defer the sync until the end.
+- View inherit: `list_price` on the product template form is marked
+  `readonly="has_priced_variants"` and the helper field is added to
+  the form data context.
+- Module icon (`static/description/icon.svg` and `icon.png`): a price
+  tag with an equals sign over an Odoo-purple background and three
+  variant-colour dots, signalling "absolute price per variant" rather
+  than "extra added to the template price".
+
+### Removed
+
+- `product.template._price_compute('list_price', ...)` override (no
+  longer necessary; the synced `list_price` is the right value).
+- `product.template._get_combination_info` override (same reason).
+- The defensive `sale.order.line` import is kept as a documentation
+  stub but contains no behaviour.
+
+### Migration
+
+- Existing installations are upgraded automatically: after running
+  `-u product_variant_fixed_price`, the post-install hook re-runs the
+  sync once for every template whose attribute values were migrated
+  from `price_extra`.
+- Stores that were partially relying on the previous display override
+  for templates with mixed fixed_price / price_extra variants will
+  fall back to the standard Odoo display (template list_price) for
+  those templates. To get the cheapest-variant display back, fill in
+  `fixed_price` on every variant's attribute values so the sync rule
+  applies.
+
 ## [19.0.1.1.1] - 2026-05-08
 
 ### Fixed
@@ -99,7 +157,8 @@ and this project adheres to the Odoo module versioning scheme
 - Pricelist rules are not bypassed; they are evaluated on top of the new
   base price.
 
-[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.1.1...19.0
+[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.2.0.0...19.0
+[19.0.2.0.0]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.1.1...19.0.2.0.0
 [19.0.1.1.1]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.1.0...19.0.1.1.1
 [19.0.1.1.0]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.1...19.0.1.1.0
 [19.0.1.0.1]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.0...19.0.1.0.1
