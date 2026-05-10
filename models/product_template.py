@@ -4,6 +4,43 @@ from odoo import models
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    def _price_compute(self, price_type, *args, **kwargs):
+        """Substitute the cheapest variant's fixed price for the template.
+
+        ``product.template._price_compute('list_price')`` is the upstream
+        method called by every place that asks "what does this template
+        cost?" — including ``website_sale`` ``_get_sales_prices`` (the
+        actual ``/shop`` page), the price-range filter slider and the
+        category snippets.
+
+        Out of the box it returns ``template.list_price``, which is
+        usually zero on stores that price at the variant level. We
+        substitute the lowest priced variant's ``_price_compute('list_price')``
+        result when at least one variant of the template has a
+        ``fixed_price > 0``. The variant call goes through
+        :meth:`product.product._price_compute` which already handles the
+        fixed-price substitution and any uom / currency context.
+        """
+        prices = super()._price_compute(price_type, *args, **kwargs)
+
+        if price_type != "list_price":
+            return prices
+
+        for template in self:
+            priced_variants = template.product_variant_ids.filtered(
+                lambda p: p.has_fixed_price
+            )
+            if not priced_variants:
+                continue
+            cheapest = min(priced_variants, key=lambda p: p.lst_price)
+            variant_prices = cheapest._price_compute(
+                price_type, *args, **kwargs
+            )
+            if cheapest.id in variant_prices:
+                prices[template.id] = variant_prices[cheapest.id]
+
+        return prices
+
     def _get_combination_info(
         self,
         combination=False,
@@ -13,24 +50,15 @@ class ProductTemplate(models.Model):
     ):
         """Show the cheapest fixed-price variant on template-level views.
 
-        Out of the box, the e-commerce shop list (and any other view that
-        asks "what does this template cost?") returns ``template.list_price``
-        whenever ``_get_combination_info`` is called without a specific
-        variant. The product detail page, on the other hand, defaults to
-        the cheapest variant. The two views can therefore display different
-        prices for the same product, which is confusing for shoppers.
-
-        When at least one variant of the template has a ``fixed_price > 0``,
-        this override forwards the template-level call through the cheapest
-        priced variant and copies the resulting price-related keys back
-        into the template-level result. Display name, image and
-        ``product_template_id`` are kept untouched so the shop card still
-        shows the template, just with the cheapest variant's price.
+        This complements the :meth:`_price_compute` override by also
+        handling the cases where ``_get_combination_info`` is called
+        without a specific variant — namely the e-commerce category
+        snippets and the configurator's default state.
 
         Standard behaviour is preserved when:
           * a specific ``combination`` or ``product_id`` is requested
-            (the variant's own price is already correct via the
-            ``_price_compute`` override on ``product.product``), or
+            (the variant's own price is already correct via
+            :meth:`product.product._price_compute`), or
           * none of the template's variants has a ``fixed_price > 0``.
         """
         res = super()._get_combination_info(
@@ -49,19 +77,22 @@ class ProductTemplate(models.Model):
         if not priced_variants:
             return res
 
-        # ``lst_price`` already accounts for the configured fixed price and
-        # any uom / currency context, so it is a faithful proxy for the
-        # variant's "starting from" price.
         cheapest = min(priced_variants, key=lambda p: p.lst_price)
 
-        # Re-run the standard logic for the cheapest variant so pricelist
-        # rules, taxes-included display and discount flags reflect that
-        # variant rather than the template default.
+        # Drop ``only_template`` from the keyword arguments forwarded to
+        # the second ``super()`` call. With ``only_template=True`` the
+        # parent method ignores the variant ``product_id`` and falls back
+        # to template-level pricing — which is exactly the value we are
+        # trying to override here.
+        variant_kwargs = {
+            k: v for k, v in kwargs.items() if k != "only_template"
+        }
+
         cheapest_info = super()._get_combination_info(
             combination=cheapest.product_template_attribute_value_ids,
             product_id=cheapest.id,
             *args,
-            **kwargs,
+            **variant_kwargs,
         )
 
         for key in (

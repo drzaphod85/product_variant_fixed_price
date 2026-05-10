@@ -144,7 +144,8 @@ value `0.0`), so re-installing the module is safe.
 | `product.template.attribute.value` | New `fixed_price` Float field. |
 | `product.product._compute_product_lst_price` | Returns `sum(fixed_price)` when any attribute value has it set, otherwise calls `super()`. |
 | `product.product._price_compute('list_price', …)` | Same substitution, applied at the entry point used by pricelists, the website and sale order lines. |
-| `product.template._get_combination_info` | When called without a specific variant (e-commerce shop list), routes a second `super()` call through the cheapest variant with a `fixed_price > 0` and copies the price-related keys back. Display name and image stay at the template level. |
+| `product.template._price_compute('list_price', …)` | Returns the cheapest priced variant's price for the template. This is the upstream method called by `_get_sales_prices` on the `/shop` page. |
+| `product.template._get_combination_info` | When called without a specific variant (snippets, configurator default), routes a second `super()` call through the cheapest variant with a `fixed_price > 0` and copies the price-related keys back. Display name and image stay at the template level. |
 | `sale.order.line._compute_price_unit` | Extra `@api.depends` so draft order lines recompute when an attribute value's `fixed_price` is edited later. |
 | Views | `fixed_price` exposed next to `price_extra`; `fixed_price_total` shown on the variant form. |
 

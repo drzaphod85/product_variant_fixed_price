@@ -1,6 +1,6 @@
 {
     "name": "Product Variant Fixed Price",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.1.1",
     "summary": (
         "Set an absolute (fixed) sales price per product variant attribute "
         "value instead of an extra amount added on top of the template price."

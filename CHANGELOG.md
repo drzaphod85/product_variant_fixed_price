@@ -9,6 +9,23 @@ and this project adheres to the Odoo module versioning scheme
 
 ## [Unreleased]
 
+## [19.0.1.1.1] - 2026-05-08
+
+### Fixed
+
+- The shop list (`/shop`) still showed `0,00 kr` on templates priced at
+  the variant level. The previous release (`19.0.1.1.0`) only overrode
+  `_get_combination_info`, but Odoo 19's website actually goes through
+  `product.template._get_sales_prices` -> `template._price_compute('list_price')`
+  for the shop card. A new override on `product.template._price_compute`
+  now substitutes the cheapest priced variant's price at that upstream
+  call, so the card matches the product page.
+- `_get_combination_info` override forwarded `only_template=True` into
+  the second `super()` call, which made the parent ignore the variant
+  `product_id` and fall back to template-level pricing (defeating the
+  whole point of the override). The flag is now stripped from the
+  forwarded kwargs.
+
 ## [19.0.1.1.0] - 2026-05-08
 
 ### Added
@@ -82,7 +99,8 @@ and this project adheres to the Odoo module versioning scheme
 - Pricelist rules are not bypassed; they are evaluated on top of the new
   base price.
 
-[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.1.0...19.0
+[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.1.1...19.0
+[19.0.1.1.1]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.1.0...19.0.1.1.1
 [19.0.1.1.0]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.1...19.0.1.1.0
 [19.0.1.0.1]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.0...19.0.1.0.1
 [19.0.1.0.0]: https://github.com/drzaphod85/product_variant_fixed_price/releases/tag/19.0.1.0.0
