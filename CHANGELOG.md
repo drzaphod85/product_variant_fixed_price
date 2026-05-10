@@ -9,6 +9,26 @@ and this project adheres to the Odoo module versioning scheme
 
 ## [Unreleased]
 
+## [19.0.1.1.0] - 2026-05-08
+
+### Added
+
+- `product.template._get_combination_info` override that aligns the
+  e-commerce shop list price with the product detail page. When the
+  template-level call is made (no specific variant requested) and at
+  least one variant of the template has a `fixed_price > 0`, the
+  cheapest priced variant is used to compute `price` / `list_price` /
+  `has_discounted_price`. Display name, image and `product_template_id`
+  are kept untouched, so the shop card still shows the template — just
+  with the cheapest variant's price.
+- New `models/product_template.py` module file.
+
+### Notes
+
+- Standard Odoo behaviour is preserved when no variant of the template
+  has a fixed price set, or when a specific combination / variant is
+  requested by the caller (POS, sale order, configurator).
+
 ## [19.0.1.0.1] - 2026-05-08
 
 ### Fixed
@@ -62,6 +82,7 @@ and this project adheres to the Odoo module versioning scheme
 - Pricelist rules are not bypassed; they are evaluated on top of the new
   base price.
 
-[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.1...19.0
+[Unreleased]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.1.0...19.0
+[19.0.1.1.0]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.1...19.0.1.1.0
 [19.0.1.0.1]: https://github.com/drzaphod85/product_variant_fixed_price/compare/19.0.1.0.0...19.0.1.0.1
 [19.0.1.0.0]: https://github.com/drzaphod85/product_variant_fixed_price/releases/tag/19.0.1.0.0
